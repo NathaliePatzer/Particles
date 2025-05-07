@@ -77,6 +77,9 @@
     <ClCompile Include="CParticles.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Scene7.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneBaseClass.h">
@@ -144,6 +147,9 @@
     </ClInclude>
     <ClInclude Include="CParticles.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene7.h">
+      <Filter>Scenes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

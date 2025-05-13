@@ -60,6 +60,7 @@ private:
 	GLfloat LightDiffuse[4];
 	GLfloat LightSpecular[4];
 	GLfloat LightPosition[4];
+	GLfloat LightDirection[4];
 
 	// Definindo as propriedades do material
 	GLfloat MatAmbient[4];
@@ -68,6 +69,7 @@ private:
 	GLfloat MatShininess;
 
 	float fLightSpeed;
+	bool bPointLight;
 
 };
 

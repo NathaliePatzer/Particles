@@ -23,7 +23,7 @@ CScene7::CScene7()
 	// Cria o Timer
 	pTimer = new CTimer();
 	pTimer->Init();
-
+	
 	fTimerPosY = 0.0f;
 	fRenderPosY = 0.0f;
 
@@ -36,9 +36,11 @@ CScene7::CScene7()
 	LightDiffuse[0] = 1.0f; LightDiffuse[1] = 1.0f; LightDiffuse[2] = 1.0f; LightDiffuse[3] = 1.0f;
 	LightSpecular[0] = 1.0f; LightSpecular[1] = 1.0f; LightSpecular[2] = 1.0f; LightSpecular[3] = 1.0f;
 	LightPosition[0] = 0.0f; LightPosition[1] = 10.0f; LightPosition[2] = 20.0f; LightPosition[3] = 1.0f;
+	LightDirection[0] = 0.0f; LightDirection[1] = -1.0f; LightDirection[2] = 0.0f; LightDirection[3] = 1.0f; // spotlight
 
 	//Velocidade da translação da luz
 	fLightSpeed = 0.5f;
+	bPointLight = true;
 }
 
 
@@ -118,12 +120,27 @@ int CScene7::DrawGLScene(void)	// Função que desenha a cena
 
 	glEnable(GL_LIGHTING); //Habilita o uso de iluminação
 
-	//Configuração da fonte de luz (POINT LIGHT)
-	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, LightSpecular);
-	glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
-	glEnable(GL_LIGHT0);
+	if (bPointLight) 
+	{
+		//Configuração da fonte de luz (POINT LIGHT)
+		glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, LightSpecular);
+		glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
+		glEnable(GL_LIGHT0); //Habilita a luz 0
+	}
+	else
+	{
+		glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
+		glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
+		glLightfv(GL_LIGHT1, GL_SPECULAR, LightSpecular);
+		glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);
+		//(SPOTLIGHT)
+		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, LightDirection);
+		glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 45.0f); // ângulo de abertura do cone de iluminação
+		glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 10.0f); // atenuação constante
+		glEnable(GL_LIGHT1); // Habilita a luz 1
+	}
 
 	//Configura material de reflexão do teapot
 	MatAmbient[0] = 0.1f;	MatAmbient[1] = 0.0f;	MatAmbient[2] = 0.0f;	MatAmbient[3] = 1.0f; //define a reflexão do material
@@ -176,7 +193,15 @@ int CScene7::DrawGLScene(void)	// Função que desenha a cena
 	Draw3DSGrid(50.0f, 50.0f);
 
 	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHT0);
+
+	if (bPointLight) {
+		glDisable(GL_LIGHT0);
+	}
+	else 
+	{
+		glDisable(GL_LIGHT1);
+	}
+	
 	glDisable(GL_LIGHTING); //Desabilita o uso de iluminação
 
 
@@ -324,6 +349,7 @@ void CScene7::KeyPressed(void) // Tratamento de teclas pressionadas
 	{
 		LightPosition[1] -= fLightSpeed;
 	}
+	
 
 }
 
@@ -339,7 +365,8 @@ void CScene7::KeyDownPressed(WPARAM	wParam) // Tratamento de teclas pressionadas
 		pTimer->Init();
 		break;
 
-	case VK_RETURN:
+	case VK_RETURN:		
+			bPointLight = !bPointLight;		
 		break;
 
 	}

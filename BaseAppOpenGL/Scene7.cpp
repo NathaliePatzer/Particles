@@ -41,6 +41,19 @@ CScene7::CScene7()
 	//Velocidade da translação da luz
 	fLightSpeed = 0.5f;
 	bPointLight = true;
+
+	iLightType = NO_LIGHT; 
+
+	LightPositionFlashlight[0] = pCamera->Position[0];
+	LightPositionFlashlight[1] = pCamera->Position[1];
+	LightPositionFlashlight[2] = pCamera->Position[2];
+	LightPositionFlashlight[3] = pCamera->Position[3];
+
+	LightDirectionFlashlight[0] = pCamera->Forward[0];
+	LightDirectionFlashlight[1] = pCamera->Forward[1];
+	LightDirectionFlashlight[2] = pCamera->Forward[2];
+	LightDirectionFlashlight[3] = pCamera->Forward[3];
+	
 }
 
 
@@ -116,31 +129,77 @@ int CScene7::DrawGLScene(void)	// Função que desenha a cena
 	glutSolidSphere(0.5f, 10, 10);
 	glPopMatrix();
 
-
-
-	glEnable(GL_LIGHTING); //Habilita o uso de iluminação
-
-	if (bPointLight) 
+	switch (iLightType)
 	{
-		//Configuração da fonte de luz (POINT LIGHT)
-		glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
-		glLightfv(GL_LIGHT0, GL_SPECULAR, LightSpecular);
-		glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
-		glEnable(GL_LIGHT0); //Habilita a luz 0
+		case NO_LIGHT:
+		{
+			glDisable(GL_LIGHTING);
+			glDisable(GL_LIGHT0); //Desabilita a luz 0
+			glDisable(GL_LIGHT1); //Desabilita a luz 1
+
+		}
+		break;
+
+		case POINT_LIGHT:
+		{
+			glDisable(GL_LIGHT1); //Desabilita a luz 1 (caso esteja ligada)
+			glEnable(GL_LIGHTING); //Habilita o uso de iluminação
+			//Configuração da fonte de luz (POINT LIGHT)
+			glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
+			glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
+			glLightfv(GL_LIGHT0, GL_SPECULAR, LightSpecular);
+			glLightfv(GL_LIGHT0, GL_POSITION, LightPosition);
+			glEnable(GL_LIGHT0); //Habilita a luz 0
+
+		}
+		break;
+
+		case SPOT_LIGHT:
+		{
+			glDisable(GL_LIGHT0); //Desabilita a luz 0 (caso esteja ligada)
+			glEnable(GL_LIGHTING); //Habilita o uso de iluminação
+			glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
+			glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
+			glLightfv(GL_LIGHT1, GL_SPECULAR, LightSpecular);
+			glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);
+			//(SPOTLIGHT)
+			glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, LightDirection);
+			glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 45.0f); // ângulo de abertura do cone de iluminação
+			glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 10.0f); // atenuação constante
+			glEnable(GL_LIGHT1); // Habilita a luz 1
+		}
+		break;
+
+		case FLASHLIGHT:
+		{
+			LightPositionFlashlight[0] = pCamera->Position[0];
+			LightPositionFlashlight[1] = pCamera->Position[1];
+			LightPositionFlashlight[2] = pCamera->Position[2];
+			LightPositionFlashlight[3] = pCamera->Position[3];
+
+			LightDirectionFlashlight[0] = pCamera->Forward[0];
+			LightDirectionFlashlight[1] = pCamera->Forward[1];
+			LightDirectionFlashlight[2] = pCamera->Forward[2];
+			LightDirectionFlashlight[3] = pCamera->Forward[3];
+
+			glDisable(GL_LIGHT0); //Desabilita a luz 0 (caso esteja ligada)
+			glEnable(GL_LIGHTING); //Habilita o uso de iluminação
+			glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
+			glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
+			glLightfv(GL_LIGHT1, GL_SPECULAR, LightSpecular);
+			glLightfv(GL_LIGHT1, GL_POSITION, LightPositionFlashlight);
+			//(SPOTLIGHT)
+			glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, LightDirectionFlashlight);
+			glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 15.0f); // ângulo de abertura do cone de iluminação
+			glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 10.0f); // atenuação constante
+			glEnable(GL_LIGHT1); // Habilita a luz 1
+		}
+			break;
 	}
-	else
-	{
-		glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);
-		glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
-		glLightfv(GL_LIGHT1, GL_SPECULAR, LightSpecular);
-		glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);
-		//(SPOTLIGHT)
-		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, LightDirection);
-		glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 45.0f); // ângulo de abertura do cone de iluminação
-		glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 10.0f); // atenuação constante
-		glEnable(GL_LIGHT1); // Habilita a luz 1
-	}
+
+	
+
+	
 
 	//Configura material de reflexão do teapot
 	MatAmbient[0] = 0.1f;	MatAmbient[1] = 0.0f;	MatAmbient[2] = 0.0f;	MatAmbient[3] = 1.0f; //define a reflexão do material
@@ -194,23 +253,10 @@ int CScene7::DrawGLScene(void)	// Função que desenha a cena
 
 	glDisable(GL_TEXTURE_2D);
 
-	if (bPointLight) {
-		glDisable(GL_LIGHT0);
-	}
-	else 
-	{
-		glDisable(GL_LIGHT1);
-	}
 	
-	glDisable(GL_LIGHTING); //Desabilita o uso de iluminação
-
-
-
-
-
-
-
-
+	glDisable(GL_LIGHT0); //Desabilita a luz 0
+	glDisable(GL_LIGHT1); //Desabilita a luz 1
+	glDisable(GL_LIGHTING);
 	
 
 
@@ -366,7 +412,13 @@ void CScene7::KeyDownPressed(WPARAM	wParam) // Tratamento de teclas pressionadas
 		break;
 
 	case VK_RETURN:		
-			bPointLight = !bPointLight;		
+	{
+		iLightType++;
+
+		if (iLightType > FLASHLIGHT) {
+			iLightType = NO_LIGHT;
+		}
+	}
 		break;
 
 	}

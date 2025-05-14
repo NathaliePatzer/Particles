@@ -62,6 +62,9 @@ private:
 	GLfloat LightPosition[4];
 	GLfloat LightDirection[4];
 
+	GLfloat LightPositionFlashlight[4];
+	GLfloat LightDirectionFlashlight[4];
+
 	// Definindo as propriedades do material
 	GLfloat MatAmbient[4];
 	GLfloat MatDiffuse[4];
@@ -70,6 +73,15 @@ private:
 
 	float fLightSpeed;
 	bool bPointLight;
+
+	enum {
+		NO_LIGHT,
+		POINT_LIGHT,
+		SPOT_LIGHT,
+		FLASHLIGHT
+	} eLightType;
+
+	int iLightType; // tipo de luz (0=sem luz, 1=luz pontual, 2=luz spot, 3=lanterna);
 
 };
 
